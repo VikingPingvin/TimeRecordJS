@@ -1,0 +1,10 @@
+<% for(let entry of data) { %>
+    <tr>
+    <td><%= entry.day %></td>
+    <td contenteditable='true' id="cellIn"> <%= entry.clockIn %> </td>
+    <td contenteditable='true' id="cellOut"><%= entry.clockOut %></td>
+    <td>TODO:Calculate</td>
+    <td>TODO:Calculate</td>
+    <td><a href="#" class="btn btn-danger btn-sm delete">X</a></td>
+    </tr>
+<% } %>
