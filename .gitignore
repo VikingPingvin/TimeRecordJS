@@ -5,6 +5,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# PKG Build results
+*.exe
+*-linux*
+*-macos*
+
 # Runtime data
 pids
 *.pid
