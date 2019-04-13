@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const Record = require('./Record.js');
 
+var dbObj = null;
 
 app.set('view engine','ejs');
 app.set('views', path.join(__dirname,'views'));
@@ -14,20 +15,24 @@ app.listen(8080, () => {
     console.log('TimeRecorder running on port 8080...');
     // Do startup checks, file exists, opening and processing...
     checkOnStartup();
+    var stdin = process.openStdin();
 });
 
 app.get('/', (req,res) => {
     //UI.displayRecords();
 
-    res.render(__dirname+'/views/index', {"data":[
+    res.render(path.join(__dirname+'/views/index'), {"data":[
         {"clockIn": "8:00", "clockOut":"16:00"},
         {"clockIn": "8:00", "clockOut":"16:00"}
     ]});
+    //res.render(__dirname+'/views/index', "data: 1");
 
 });
 
 let datetime = new Date();
 console.log(`${datetime.getFullYear()}-${datetime.getMonth()+1}-${datetime.getDate()}`);
+
+
 
 
 function checkOnStartup(){
@@ -42,14 +47,16 @@ function checkOnStartup(){
         }
         else{
             console.log('Database found. Processing data.');
-            processDatabaseFile(dbPath);
+            this.dbObj = processDatabaseFile(dbPath);
+
             return;
         }
     });
 }
 
 function createNewDatabaseFile(path){
-    fs.writeFile(path,'data', (err) => {
+    let data = {"2019":{"4":{"1":{"in":"8:00","out":"16:00"},"2":{"in":"8:00","out":"16:00"}}}};
+    fs.writeFile(path,JSON.stringify(data), (err) => {
         if(err) throw err;
         console.log('Database file created succesfully.');
     });
@@ -58,9 +65,11 @@ function createNewDatabaseFile(path){
 function processDatabaseFile(path){
     fs.readFile(path, (err, data) =>{
         if (err) throw err;
-        let body = JSON.parse(data);
-        console.log(body);
-        console.log(body["2019"]);
+        let dbObj = JSON.parse(data);
+        //console.log(dbObj);
+        //console.log(dbObj["2019"]);
+
+        return dbObj;
     })
 }
 
