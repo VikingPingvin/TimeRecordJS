@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 
 const path = require('path');
-
 const fs = require('fs');
 const Record = require('./Record.js');
 
@@ -15,7 +14,7 @@ app.listen(8080, () => {
     console.log('TimeRecorder running on port 8080...');
     // Do startup checks, file exists, opening and processing...
     checkOnStartup();
-    var stdin = process.openStdin();
+    //var stdin = process.openStdin();
 });
 
 app.get('/', (req,res) => {
@@ -25,6 +24,7 @@ app.get('/', (req,res) => {
         {"clockIn": "8:00", "clockOut":"16:00"},
         {"clockIn": "8:00", "clockOut":"16:00"}
     ]});
+    console.log(dbObj);
     //res.render(__dirname+'/views/index', "data: 1");
 
 });
@@ -38,22 +38,24 @@ console.log(`${datetime.getFullYear()}-${datetime.getMonth()+1}-${datetime.getDa
 function checkOnStartup(){
     console.log('Checking if database exists locally.')
     let dbPath = __dirname+'/DB/database.JSON';
-    fs.access(dbPath, (err) => {
+    fs.access(dbPath, async (err) => {
         if (err){
             // CREATE NEW DATABASE FILE
             console.log('No Database found, creating a new one...')
             createNewDatabaseFile(dbPath);
             return;
         }
+        // PROCESS DATABASE FILE
         else{
             console.log('Database found. Processing data.');
-            this.dbObj = processDatabaseFile(dbPath);
-
+            dbObj = await processDatabaseFile(dbPath);
+            console.log('checkonStartup: '+JSON.stringify(dbObj));
             return;
         }
     });
 }
 
+// Create a new Database JSON file
 function createNewDatabaseFile(path){
     let data = {"2019":{"4":{"1":{"in":"8:00","out":"16:00"},"2":{"in":"8:00","out":"16:00"}}}};
     fs.writeFile(path,JSON.stringify(data), (err) => {
@@ -62,16 +64,19 @@ function createNewDatabaseFile(path){
     });
 }
 
-function processDatabaseFile(path){
-    fs.readFile(path, (err, data) =>{
-        if (err) throw err;
-        let dbObj = JSON.parse(data);
-        //console.log(dbObj);
-        //console.log(dbObj["2019"]);
-
-        return dbObj;
+// Process JSON file if found
+async function processDatabaseFile(path){
+    return new Promise(resolve => {
+        fs.readFile(path, (err, data) =>{
+            if (err) throw err;
+            let jsonData = JSON.parse(data);
+            console.log(jsonData);
+            resolve(jsonData);
     })
+    });    
 }
+
+
 
 // UI Class : Handle UI tasks
 class UI {
