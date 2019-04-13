@@ -9,6 +9,7 @@ yarn-error.log*
 nodemon.json
 .vscode
 node_modules
+database.JSON
 
 # PKG Build results
 *.exe
