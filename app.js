@@ -5,7 +5,6 @@ const path = require('path');
 
 const fs = require('fs');
 const Record = require('./Record.js');
-const dataBase = require('./DB/dataBase');
 
 
 app.set('view engine','ejs');
@@ -13,17 +12,13 @@ app.set('views', path.join(__dirname,'views'));
 
 app.listen(8080, () => {
     console.log('TimeRecorder running on port 8080...');
+    // Do startup checks, file exists, opening and processing...
+    checkOnStartup();
 });
 
 app.get('/', (req,res) => {
     //UI.displayRecords();
-    let parsedJSON = null;
-    fs.readFileSync(__dirname+'/DB/timeDB.JSON','utf8', (err, file) => {
-        obj = JSON.parse(file);
-        parsedJSON = obj;
-        console.log('File read in FS\n'+obj.data);
-    });
-    //console.log(parsedJSON.data);
+
     res.render(__dirname+'/views/index', {"data":[
         {"clockIn": "8:00", "clockOut":"16:00"},
         {"clockIn": "8:00", "clockOut":"16:00"}
@@ -34,6 +29,40 @@ app.get('/', (req,res) => {
 let datetime = new Date();
 console.log(`${datetime.getFullYear()}-${datetime.getMonth()+1}-${datetime.getDate()}`);
 
+
+function checkOnStartup(){
+    console.log('Checking if database exists locally.')
+    let dbPath = __dirname+'/DB/database.JSON';
+    fs.access(dbPath, (err) => {
+        if (err){
+            // CREATE NEW DATABASE FILE
+            console.log('No Database found, creating a new one...')
+            createNewDatabaseFile(dbPath);
+            return;
+        }
+        else{
+            console.log('Database found. Processing data.');
+            processDatabaseFile(dbPath);
+            return;
+        }
+    });
+}
+
+function createNewDatabaseFile(path){
+    fs.writeFile(path,'data', (err) => {
+        if(err) throw err;
+        console.log('Database file created succesfully.');
+    });
+}
+
+function processDatabaseFile(path){
+    fs.readFile(path, (err, data) =>{
+        if (err) throw err;
+        let body = JSON.parse(data);
+        console.log(body);
+        console.log(body["2019"]);
+    })
+}
 
 // UI Class : Handle UI tasks
 class UI {
